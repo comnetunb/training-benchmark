@@ -46,7 +46,7 @@ batch_size = quantidade_das_amostras_de_treinamento // 1
 ################################################################################################
 """
 
-numero_de_algoritmos = len(filter(lambda x: x != '', algorithms()))
+numero_de_algoritmos = len([x for x in algorithms() if x != ''])
 
 filenames = []
 contador_sementes = 0

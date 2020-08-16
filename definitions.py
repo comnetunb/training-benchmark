@@ -1,5 +1,6 @@
+from enum import Enum
 
 
-class Topology(enum):
+class Topology(Enum):
     USANET = 0
     PANEURO = 1
