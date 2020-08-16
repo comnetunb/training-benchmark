@@ -19,6 +19,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 from keras.models import Sequential    # RN do tipo sequencial: entrada - camadas - saida
 from keras.layers import Dense, Dropout         # camadas densas - todos neuronios sao ligados e tal...
 from keras.layers import Conv1D, MaxPooling1D, Flatten   #CNN 1D
+from configuration import use_gpu, use_cnn, seed_count, epoch_count
 import random
 import os        #a variavel abaixo evita mostrar uso de memoria de 10% excedente e tal
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -30,19 +31,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 ################################################################################################
 """
 
-CNN = False 
-GPU_Giga = False
-
-numero_de_sementes = 1    # tenho 5 sementes
 
 topologia = 'usanet'
 #topologia = 'paneuro'
 
 #porcentagem_de_features = 1   # default eh 40
 
-numero_de_epocas = 1
-
-quantidade_das_amostras_de_treinamento = 10080 * numero_de_sementes
+quantidade_das_amostras_de_treinamento = 10080 * seed_count
 batch_size = quantidade_das_amostras_de_treinamento // 1
 #OBS.: em 1 semente o len(filenames_treinamento) eh 10080, em 2 eh 20160, em 3 eh 30240, em 4 eh 40320, em 5 eh 50400  
 
@@ -80,13 +75,13 @@ for semente in ['10','1','7','16','22']:
             for i in range(10,100,1):   
                 nome_arquivo = semente + '_' + nomes_algoritmos[index] + '_' + carga + '_state_' + str(i+1) + '000.txt'
                 filenames.append(nome_arquivo)
-    if numero_de_sementes == contador_sementes:
+    if seed_count == contador_sementes:
         break
 
 
 numero_de_estados_por_carga = 90  # de 11.000 a 100.000
 numero_de_cargas = len(vetor_cargas)
-inputs_por_algoritmo = numero_de_estados_por_carga * numero_de_cargas * numero_de_sementes  #por algoritmo
+inputs_por_algoritmo = numero_de_estados_por_carga * numero_de_cargas * seed_count  #por algoritmo
 
 
 # Criando as classes 
@@ -191,7 +186,7 @@ numero_features = previsores.shape[1]
 ######################################################################################################
 '''
 
-if GPU_Giga:
+if use_gpu:
     from tensorflow.compat.v1 import ConfigProto
     from tensorflow.compat.v1 import InteractiveSession
 
@@ -405,7 +400,7 @@ for fold in [1]:#[1,2,3,4,5]:
     '''
     
     '''
-    if CNN:
+    if use_cnn:
         #tratamento da entrada para a CNN
         previsores_treinamento = np.expand_dims(previsores_treinamento, axis=2)
         previsores_teste = np.expand_dims(previsores_teste, axis=2)   
@@ -461,7 +456,7 @@ for fold in [1]:#[1,2,3,4,5]:
     '''
     #antigo... o fit() precisa do dataset todo na memoria 
     history = classificador.fit(previsores_treinamento, classe_treinamento,
-                            batch_size = 10, epochs = numero_de_epocas,
+                            batch_size = 10, epochs = epoch_count,
                             validation_data = (previsores_teste,classe_teste),
                             shuffle = True, verbose = 1)  
     '''
@@ -482,7 +477,7 @@ for fold in [1]:#[1,2,3,4,5]:
 
     history = classificador.fit_generator(generator = gerador(filenames_treinamento,classe_treinamento,batch_size,numero_features), 
                   steps_per_epoch = steps_per_epoch_treinamento, 
-                  epochs = numero_de_epocas,
+                  epochs = epoch_count,
                   verbose = 1,    #mostra o progresso de treinamento em cada epoca
                   #validation_data = gerador(filenames_teste,classe_teste,batch_size,numero_features),
                   #validation_steps = steps_per_epoch_teste
@@ -525,7 +520,7 @@ for fold in [1]:#[1,2,3,4,5]:
     #val_loss   = history.history['val_loss']
     train_acc  = history.history['categorical_accuracy']
     #val_acc    = history.history['val_categorical_accuracy']
-    xc         = range(numero_de_epocas)
+    xc         = range(epoch_count)
 
     #para printar no linux:
     print('train_loss: ',train_loss)
@@ -659,7 +654,7 @@ for fold in [1]:#[1,2,3,4,5]:
         print(matriz5)
 
     porcentagem_features = 100
-    print('Simulacao feita na topologia ',topologia,' com ',numero_de_algoritmos,'algoritmos, ',numero_de_sementes,'sementes, ',porcentagem_features,'% de features ',numero_de_epocas,'epocas e batch size = ',batch_size)
+    print('Simulacao feita na topologia ',topologia,' com ',numero_de_algoritmos,'algoritmos, ',seed_count,'sementes, ',porcentagem_features,'% de features ',epoch_count,'epocas e batch size = ',batch_size)
     
       
     ######################################################################################################
