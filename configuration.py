@@ -1,5 +1,9 @@
 import argparse
 from definitions import Topology
+import os
+
+# a variavel abaixo evita mostrar uso de memoria de 10% excedente e tal
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 use_gpu = False
 use_cnn = False

@@ -7,13 +7,12 @@ RSA com Modulacoes BPSK QPSK 8QAM
 @author: guilhermeeneas
 """
 
-import os  # a variavel abaixo evita mostrar uso de memoria de 10% excedente e tal
 from keras.layers import Conv1D, MaxPooling1D, Flatten  # CNN 1D
 from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.utils import shuffle
 import random
 from definitions import Topology
-from configuration import use_gpu, use_cnn, seed_count, epoch_count, topology
+from configuration import use_gpu, use_cnn, seed_count, epoch_count, topology, algorithms, loads
 # camadas densas - todos neuronios sao ligados e tal...
 from keras.layers import Dense, Dropout
 # RN do tipo sequencial: entrada - camadas - saida
@@ -26,7 +25,6 @@ import time
 inicio = time.time()
 # import matplotlib.pyplot as plt  #botei agora pra testar grafico
 #import gui_functions as gui
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 """
@@ -41,19 +39,6 @@ quantidade_das_amostras_de_treinamento = 10080 * seed_count
 batch_size = quantidade_das_amostras_de_treinamento // 1
 # OBS.: em 1 semente o len(filenames_treinamento) eh 10080, em 2 eh 20160, em 3 eh 30240, em 4 eh 40320, em 5 eh 50400
 
-'''    NO NOTE:   '''
-#nomes_algoritmos = ['K1SP_Random','K1SP_DP','K1SP_FirstFit','K3SP_BestFit','K3SP_PP','AP','K3SP_LastFit','K5SP_FirstFit','K5SP_CS','MAdapSPV']
-nomes_algoritmos = ['K1SP_Random', 'K1SP_FirstFit',
-                    'K3SP_BestFit', '', '', '', '', '', '', '']
-
-'''    NA MV ou  NO GCP   '''
-#nomes_algoritmos = ['K5SP_Random','K3SP_DP','K2SP_BestFit','K1SP_FirstFit','K4SP_PP','K3SP_AP','K2SP_LastFit','K7SP_FirstFit','K5SP_CS','MAdapSPV']
-
-
-vetor_cargas = ['150', '200', '250', '300', '350', '400',
-                '450', '500', '550', '600', '650', '700', '750', '800']
-#vetor_cargas = ['75','100','125','150','175','200','225','250','275','300','325','350','375','400']
-
 
 """
 ################################################################################################
@@ -61,19 +46,17 @@ vetor_cargas = ['150', '200', '250', '300', '350', '400',
 ################################################################################################
 """
 
-numero_de_algoritmos = 0
-for i in nomes_algoritmos:
-    if i != '':
-        numero_de_algoritmos += 1
+numero_de_algoritmos = len(filter(lambda x: x != '', algorithms()))
 
 filenames = []
 contador_sementes = 0
 
+nomes_algoritmos = algorithms()
 # Criar nomes dos arquivos
 for semente in ['10', '1', '7', '16', '22']:
     contador_sementes = contador_sementes + 1
     for index in range(numero_de_algoritmos):
-        for carga in vetor_cargas:
+        for carga in loads():
             for i in range(10, 100, 1):
                 nome_arquivo = semente + '_' + \
                     nomes_algoritmos[index] + '_' + carga + \
@@ -84,7 +67,7 @@ for semente in ['10', '1', '7', '16', '22']:
 
 
 numero_de_estados_por_carga = 90  # de 11.000 a 100.000
-numero_de_cargas = len(vetor_cargas)
+numero_de_cargas = len(loads())
 inputs_por_algoritmo = numero_de_estados_por_carga * \
     numero_de_cargas * seed_count  # por algoritmo
 
@@ -128,6 +111,7 @@ elif topology == Topology.PANEURO:
 '''
 num_estados = 1   #apenas 1 estado... nao mudar
 
+nomes_algoritmos = algorithms()
 numero_de_algoritmos = 0  
 for i in nomes_algoritmos:
     if i != '':
@@ -603,7 +587,7 @@ for fold in [1]:  # [1,2,3,4,5]:
 
     # isso aqui ta certo !
     #A funcao abaixo retorna o indice da coluna que tem o maior valor. Alternativa: classe_teste2 = [np.argmax(t) for t in classe_teste]    
-    classe_teste2 = np.argmax(classe_teste, axis=1)
+    classe_teste2 = np.argmax(classe_testaxis=1)
 
     #isso aqui ta errado ! 
     #previsoes     
